@@ -1,0 +1,22 @@
+{
+  "name": "poloniex-trader",
+  "version": "1.0.0",
+  "description": "Poloniex trader and analyzer",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coyotte508/poloniex-trader.git"
+  },
+  "author": "coyotte508",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/coyotte508/poloniex-trader/issues"
+  },
+  "homepage": "https://github.com/coyotte508/poloniex-trader#readme",
+  "dependencies": {
+    "autobahn": "^0.10.1"
+  }
+}
