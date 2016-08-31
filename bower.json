@@ -1,0 +1,21 @@
+{
+  "name": "poloniex-trader",
+  "description": "Analyzes trades and make them",
+  "main": "frontend.js",
+  "authors": [
+    "coyotte508 <coyotte508@gmail.com>"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/coyotte508/poloniex-trader",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.6"
+  }
+}

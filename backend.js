@@ -1,4 +1,5 @@
-var autobahn = require('autobahn');
+const trades = require("./trades.js");
+const autobahn = require('autobahn');
 var wsuri = "wss://api.poloniex.com";
 var market = "BTC_XMR";
 var connection = new autobahn.Connection({
@@ -13,6 +14,7 @@ connection.onopen = function (session) {
         return;
       }
       console.log("market", event, kwargs);
+      trades.addTrade(event.data, kwargs.seq);
     });
   }
   function tickerEvent (args,kwargs) {
