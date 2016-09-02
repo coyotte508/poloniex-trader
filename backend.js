@@ -13,7 +13,7 @@ connection.onopen = function (session) {
       if (event.type != "newTrade") {
         return;
       }
-      console.log("market", event, kwargs);
+      //console.log("market", event, kwargs);
       trades.addTrade(event.data, kwargs.seq);
     });
   }
@@ -36,3 +36,8 @@ connection.onclose = function () {
 }
 
 connection.open();
+
+module.exports = {
+  trades,
+  market
+};

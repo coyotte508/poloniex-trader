@@ -1,7 +1,8 @@
-var trades = [];
+const trades = [];
 
 function addTrade(trade, order) {
   trades.push(trade);
+  console.log(trades.length);
 }
 
 function getHigh(type) {
@@ -34,8 +35,8 @@ function averageRate(type) {
   var cnt = 0;
 
   applyTrades(type, function(trade) {
-    total += trade.rate;
-    cnt += trade.amount;
+    total += +trade.rate*(+trade.amount);
+    cnt += +trade.amount;
   });
 
   try {
@@ -50,16 +51,37 @@ function volume(type) {
   var cnt = 0;
 
   applyTrades(type, function(trade) {
-    cnt += trade.amount;
+    cnt += +trade.amount;
   });
 
   return cnt;
 }
 
+function rate() {
+  return getLastTrade().rate;
+}
+
+/* Utility functions */
+function getLastTrade() {
+  console.log(trades);
+  return trades.length > 0 ? trades[trades.length - 1] : {};
+}
+
+function applyTrades(type, callback) {
+  trades.forEach(function(trade) {
+    if (!type || trade.type == type) {
+      callback(trade);
+    }
+  });
+}
+
+/* Exports */
+
 module.exports = {
   addTrade,
-  getHigh,
-  getLow,
-  averageRate,
-  volume
+  high: getHigh,
+  low: getLow,
+  average: averageRate,
+  volume,
+  rate
 };

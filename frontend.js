@@ -2,13 +2,13 @@ const express = require('express');
 const path = require('path');
 const compression = require('compression');
 const bodyParser = require('body-parser');
-const creds = require('./credentials.js');
 const basicAuth = require('basic-auth');
 const https = require('https');
-const httpsPort = 3443;
+const httpsPort = 3444;
 const fs = require("fs");
 const moment = require("moment-timezone");
 
+const backend = require("./backend.js");
 const config = {};
 const app = express();
 
@@ -55,10 +55,10 @@ app.use("/", express.static(__dirname + '/public'));
 app.set('view engine', 'ejs'); 
 
 app.get('/', auth, function(req, res) {  
-  res.render('index', {config,error:null})
+  res.render('index', {config, trades: backend.trades, error:null, market:backend.market})
 });
 
-app.listen(3000);
+app.listen(3001);
 
 // Setup HTTPS
 const ssloptions = {

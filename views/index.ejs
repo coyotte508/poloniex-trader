@@ -32,8 +32,8 @@
     <div class="container">
 
       <div class="starter-template">
-        <h1>Poloniex-trader configuration</h1>
-        <p class="lead">Use this web interface to quickly configure the program.<br> No need to use the terminal anymore, everything in one interface.</p>
+        <h1>Poloniex-trader - <%- market %></h1>
+        <!--<p class="lead">Use this web interface to quickly configure the program.<br> No need to use the terminal anymore, everything in one interface.</p>-->
       </div>
 
       <% if (error) { %>
@@ -43,6 +43,27 @@
         <%- error %>
       </div>
       <% } %>
+
+      <div class="row">
+        <ul class="market-ticker">
+          <li><b>Last price</b> <%- trades.rate() %></li>
+          <li><b>Volume</b><%- trades.volume().toFixed(3) %></li>
+          <li><b>Bid</b></li>
+          <li><b>Ask</b></li>
+          <li><b>Spread</b></li>
+        </ul>
+      </div>
+      
+      <div class="row">
+        <p class="lead">For time period</p>
+        <ul class="market-ticker">
+          <li><b>Sell</b> <%- trades.average('sell').toFixed(8) %></li>
+          <li><b>Buy</b><%- trades.average('buy').toFixed(8) %></li>
+          <li><b>Rate</b><%- trades.average().toFixed(8) %></li>
+          <li><b>High</b><%- trades.high() %></li>
+          <li><b>Low</b><%- trades.low() %></li>
+        </ul>
+      </div>
 
     </div><!-- /.container -->
 
