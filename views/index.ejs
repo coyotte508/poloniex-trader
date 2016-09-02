@@ -57,8 +57,8 @@
       <div class="row">
         <p class="lead">For time period</p>
         <ul class="market-ticker">
-          <li><b>Sell</b> <%- trades.average().toFixed(8) %></li>
-          <li><b>Buy</b><%- trades.average().toFixed(8) %></li>
+          <li><b>Sell</b> <%- trades.averageSell().toFixed(8) %></li>
+          <li><b>Buy</b><%- trades.averageBuy().toFixed(8) %></li>
           <li><b>Rate</b><%- trades.average().toFixed(8) %></li>
           <li><b>Low</b><%- trades.low() %></li>
           <li><b>High</b><%- trades.high() %></li>

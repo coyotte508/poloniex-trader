@@ -62,7 +62,7 @@ function volume(trades) {
 }
 
 function rate() {
-  return lastTrade.rate;
+  return getLastTrade().rate;
 }
 
 /* Utility functions */
@@ -78,6 +78,10 @@ function makeAveragingFunction(identifier, baseFunc, propName, filter) {
       var fakeTrade = {amount: item.weight};
       fakeTrade[propName] = item.data;
     }));
+
+    if (filter) {
+      newTrades = newTrades.filter(el =>  !el.type || el.type == filter);
+    }
 
     var data = baseFunc(newTrades);
     var weight = newTrades.map(el => el.amount).reduce((prev, cur) => prev + (+cur), 0);
@@ -106,7 +110,9 @@ generateFunctions(
   {id: "low", func: getLow, prop: "rate"},
   {id: "high", func: getHigh, prop: "rate"},
   {id: "volume", func: volume, prop: "amount"},
-  {id: "average", func: averageRate, prop: "rate"}
+  {id: "average", func: averageRate, prop: "rate"},
+  {id: "averageSell", func: averageRate, prop: "rate", filter: "sell"},
+  {id: "averageBuy", func: averageRate, prop: "rate", filter: "buy"}
 );
 
 internals["lastPrice"] = rate;
