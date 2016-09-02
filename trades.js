@@ -99,10 +99,10 @@ function generateFunctions() {
     var func = makeAveragingFunction(arg.id, arg.func, arg.prop, arg.filter);
     trades.addAveragingFunction(arg.id, func);
     internals[arg.id] = function(begin, end) {
-      //console.log(begin, end);
       begin = begin === undefined ? 3600 : begin;
       end = end || 0;
       var tradeData = trades.getAveragedDataTimeRange(trades.currentTime-begin, trades.currentTime-end);
+      console.log(begin, end, tradeData);
 
       return func(tradeData.trades, tradeData.averages).data;
     }

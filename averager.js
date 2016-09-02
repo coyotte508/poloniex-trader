@@ -73,13 +73,17 @@ Averager.prototype.addAveragingFunction = function(key, func) {
 Averager.prototype.getDataTimeRange = function(begin, end) {
   var res = [];
 
+  if (end < begin) {
+    return res;
+  }
+
   for (var i = 0; i < this.data.length; i = i +1) {
     if (begin > this.data[i].timeEnd || end < this.data[i].timeStart) {
       continue;
     }
 
     this.data[i].raw.forEach(function(item) {
-      if (item.timeStamp < begin || item.timeStart > end) {
+      if (item.timeStamp < begin || item.timeStamp > end) {
         return;
       }
 
