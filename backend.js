@@ -7,13 +7,15 @@ var connection = new autobahn.Connection({
   realm: "realm1"
 });
 
+var cnt = 0;
+
 connection.onopen = function (session) {
   function marketEvent (args,kwargs) {
     args.forEach(function(event) {
       if (event.type != "newTrade") {
         return;
       }
-      //console.log("market", event, kwargs);
+      console.log(++cnt);
       trades.addTrade(event.data, kwargs.seq);
     });
   }

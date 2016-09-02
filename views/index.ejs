@@ -46,7 +46,7 @@
 
       <div class="row">
         <ul class="market-ticker">
-          <li><b>Last price</b> <%- trades.rate() %></li>
+          <li><b>Last price</b> <%- trades.lastPrice() %></li>
           <li><b>Volume</b><%- trades.volume().toFixed(3) %></li>
           <li><b>Bid</b></li>
           <li><b>Ask</b></li>
@@ -57,8 +57,8 @@
       <div class="row">
         <p class="lead">For time period</p>
         <ul class="market-ticker">
-          <li><b>Sell</b> <%- trades.average('sell').toFixed(8) %></li>
-          <li><b>Buy</b><%- trades.average('buy').toFixed(8) %></li>
+          <li><b>Sell</b> <%- trades.average().toFixed(8) %></li>
+          <li><b>Buy</b><%- trades.average().toFixed(8) %></li>
           <li><b>Rate</b><%- trades.average().toFixed(8) %></li>
           <li><b>Low</b><%- trades.low() %></li>
           <li><b>High</b><%- trades.high() %></li>

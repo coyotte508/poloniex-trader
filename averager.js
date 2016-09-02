@@ -18,7 +18,7 @@ function Averager() {
 }
 
 Averager.prototype.addData = function(object, timeData) {
-  var seq = timeData.seq;
+  var order = timeData.order;
   var stamp = Math.floor(new Date(timeData.date).getTime() / 1000);
 
   if (this.currentTime < stamp) {
@@ -32,10 +32,10 @@ Averager.prototype.addData = function(object, timeData) {
     this.newBlock();
   }
 
-  this.lastData().addData(object, [stamp, seq]);
+  this.lastData().addData(object, [stamp, order]);
 };
 
-Averager.prototype.lastData() = function() {
+Averager.prototype.lastData = function() {
   return this.data[this.data.length-1];
 };
 
@@ -63,6 +63,10 @@ Averager.prototype.averageOldData = function() {
   this.lastAveraged = this.currentTime;
 };
 
+Averager.prototype.addAveragingFunction = function(key, func) {
+  this.averagingFunctions[key] = func;
+};
+
 /* Get all trades in a time range, in the format [{object, timeStamp}, ...] */
 Averager.prototype.getDataTimeRange = function(begin, end) {
   var res = [];
@@ -72,10 +76,11 @@ Averager.prototype.getDataTimeRange = function(begin, end) {
       continue;
     }
 
-    this.data[i].forEach(function(item) {
+    this.data[i].raw.forEach(function(item) {
       if (item.timeStamp < begin || item.timeStart > end) {
         return;
       }
+
       res.push(item);
     });
   }
@@ -94,7 +99,7 @@ Averager.prototype.getAveragedDataTimeRange = function(begin, end) {
   var averageEnd = 0;
   var averages = [];
 
-  averagedData.forEach(function(item) {
+  this.averagedData.forEach(function(item) {
     if (item.timeStart < begin) {
       return;
     }
@@ -110,7 +115,7 @@ Averager.prototype.getAveragedDataTimeRange = function(begin, end) {
     averages.push(item);
   });
 
-  var trades = this.getDataTimeRange(begin, averageBegin-begin).concat(end, averageEnd-end);
+  var trades = this.getDataTimeRange(begin, averageBegin-1).concat(this.getDataTimeRange(begin > averageEnd ? begin: averageEnd+1, end));
   return {trades, averages};
 };
 
@@ -150,4 +155,8 @@ Data.prototype.addData = function(object, timeData) {
 
 Data.prototype.isEmpty = function() {
   return this.raw.length == 0;
+};
+
+module.exports = function() {
+  return new Averager();
 };
