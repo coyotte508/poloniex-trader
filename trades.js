@@ -72,11 +72,13 @@ function getLastTrade() {
 
 function makeAveragingFunction(identifier, baseFunc, propName, filter) {
   return function(trades, averages) {
-    averages = averages.map(av => av.data[identifier]);
+    averages = (averages || []).map(av => av.data[identifier]);
 
     var newTrades = trades.map(it => it.object).concat(averages.map(function(item) {
       var fakeTrade = {amount: item.weight};
       fakeTrade[propName] = item.data;
+
+      return fakeTrade;
     }));
 
     if (filter) {
@@ -97,6 +99,7 @@ function generateFunctions() {
     var func = makeAveragingFunction(arg.id, arg.func, arg.prop, arg.filter);
     trades.addAveragingFunction(arg.id, func);
     internals[arg.id] = function(begin, end) {
+      //console.log(begin, end);
       begin = begin === undefined ? 3600 : begin;
       end = end || 0;
       var tradeData = trades.getAveragedDataTimeRange(trades.currentTime-begin, trades.currentTime-end);

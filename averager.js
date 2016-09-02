@@ -46,21 +46,23 @@ Averager.prototype.newBlock = function() {
 
 Averager.prototype.averageOldData = function() {
   /* Last non-averaged trade needs to be 30 minutes old at least */
-  if ( (this.currentTime - this.lastAveraged) < 30*60) {
-    return;
+  while ( (this.currentTime - this.lastAveraged) > 30*60) {
+    var newAveragingTime = this.lastAveraged+15*60;
+
+    /* Get all trades in blocks of 15 minutes */
+    var trades = this.getDataTimeRange(this.lastAveraged+1, newAveragingTime);
+    var averagedData = new AveragedData(this.lastAveraged+1, newAveragingTime);
+
+    for (key in this.averagingFunctions) {
+      var result = this.averagingFunctions[key](trades);
+
+      averagedData.addData(key, result);
+    }
+    console.log(averagedData);
+
+    this.averagedData.push(averagedData);
+    this.lastAveraged = newAveragingTime;
   }
-
-  /* Get all trades in blocks of 15 minutes */
-  var trades = this.getDataTimeRange(this.lastAveraged+1, this.currentTime);
-  var averagedData = new AveragedData(this.lastAveraged+1, this.currentTime);
-
-  for (key in this.averagingFunctions) {
-    var result = this.averagingFunctions[key](trades);
-
-    this.averagedData.addData(key, result);
-  }
-  this.averagedData.push(averagedData);
-  this.lastAveraged = this.currentTime;
 };
 
 Averager.prototype.addAveragingFunction = function(key, func) {
