@@ -126,7 +126,10 @@ console.log(internals);
 /* Exports */
 
 module.exports = {
-  addTrade
+  addTrade,
+  currentTime: function() { 
+    return trades.currentTime;
+  }
 };
 
 for (key in internals) {

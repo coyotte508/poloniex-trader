@@ -90,5 +90,8 @@ https.get("https://poloniex.com/public?command=returnTradeHistory&currencyPair="
 
 module.exports = {
   trades,
-  market
+  market,
+  currentTime : function() {
+    return trades.currentTime();
+  }
 };

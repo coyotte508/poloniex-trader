@@ -47,7 +47,6 @@
       <div class="row">
         <ul class="market-ticker">
           <li><b>Last price</b> <%- trades.lastPrice() %></li>
-          <li><b>Volume</b><%- trades.volume().toFixed(3) %></li>
           <li><b>Bid</b></li>
           <li><b>Ask</b></li>
           <li><b>Spread</b></li>
@@ -55,17 +54,33 @@
       </div>
       
       <div class="row">
-        <p class="lead">For time period</p>
-        <ul class="market-ticker">
-          <li><b>Sell</b> <%- trades.averageSell().toFixed(8) %></li>
-          <li><b>Buy</b><%- trades.averageBuy().toFixed(8) %></li>
-          <li><b>Rate</b><%- trades.average().toFixed(8) %></li>
-          <li><b>Low</b><%- trades.low() %></li>
-          <li><b>High</b><%- trades.high() %></li>
-        </ul>
-      </div>
+        <div class="col-md-6">
+          <div class = "panel panel-default">
+            <div class = "panel-heading">
+              <h2 class= "panel-title">Time period</h2>
+            </div>
+            <div class = "panel-body">
 
+              <form method="get">
+                <fieldset class="form-group">
+                  <label for="url">Enter time frame</label>
+                  <input type="text" class="form-control" name="time" id="time" placeholder="2h15m30s-1h15m" value="<%- config.time %>">
+                </fieldset>
+                <p><small>h: hour, m: minute, s: second. eg: 1h15m20s. Can enter range (from 2h ago to 1h ago: 2h-1h).</small></p>
+                <ul class="market-ticker">
+                  <li><b>Average</b> <%- trades.average(config.begin, config.end).toFixed(8) %></li>
+                  <li><b>Volume</b><%- trades.volume(config.begin, config.end).toFixed(3) %></li>
+                  <li><b>Low</b><%- trades.low(config.begin, config.end) %></li>
+                  <li><b>High</b><%- trades.high(config.begin, config.end) %></li>
+                </ul>
+                <input type="submit" class="btn btn-primary pull-right" value="Submit">
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div><!-- /.container -->
+    <!-- <%- config.begin %> <%- config.end %> -->
 
     <script src="/assets/javascript/jquery.min.js"></script>
     <script src="/assets/javascript/frontend.js"></script>

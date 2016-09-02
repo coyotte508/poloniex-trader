@@ -43,6 +43,43 @@ var auth = function (req, res, next) {
   };
 };
 
+function analyzeBeginEnd(time) {
+  var spls = time.split("-");
+  var res = [];
+
+  spls.forEach( function (spl) {
+    spl = spl.trim();
+
+    var tot = 0;
+
+    if (spl.includes("h")) {
+      tot += (+spl.substr(0, spl.indexOf("h")))*3600;
+      spl = spl.substr(spl.indexOf("h") + 1);
+    }
+    if (spl.includes("m")) {
+      tot += (+spl.substr(0, spl.indexOf("m")))*60;
+      spl = spl.substr(spl.indexOf("m") + 1);
+    }
+    if (spl.includes("s")) {
+      tot += (+spl.substr(0, spl.indexOf("s")));
+      spl = spl.substr(spl.indexOf("s") + 1);
+    }
+
+    res.push(tot);
+  });
+
+  if (res.length < 1) {
+    res.push(0);
+  }
+
+  if (res.length < 2) {
+    res.push(0);
+  }
+
+  res[0] = res[0] || 3600;
+  return res;
+}
+
 app.use(compression());
 
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
@@ -54,7 +91,11 @@ console.log(__dirname + '/public');
 app.use("/", express.static(__dirname + '/public'));
 app.set('view engine', 'ejs'); 
 
-app.get('/', auth, function(req, res) {  
+app.get('/', auth, function(req, res) {
+  config.time = req.query.time || "1h";
+  var times = analyzeBeginEnd(config.time);
+  config.begin = times[0];
+  config.end = times[1];
   res.render('index', {config, trades: backend.trades, error:null, market:backend.market})
 });
 
