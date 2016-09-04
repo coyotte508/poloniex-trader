@@ -115,7 +115,7 @@ app.get('/', auth, function(req, res) {
   var times = analyzeBeginEnd(config.time);
   config.begin = times[0];
   config.end = times[1];
-  res.render('index', {config, trades: backend.trades, error:null})
+  res.render('index', {config, trades: backend.trades, backend, error:null})
 });
 
 app.post("/", auth, function(req, res) {

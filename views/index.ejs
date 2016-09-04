@@ -47,9 +47,9 @@
       <div class="row">
         <ul class="market-ticker">
           <li><b>Last price</b> <%- trades.lastPrice() %></li>
-          <li><b>Bid</b></li>
-          <li><b>Ask</b></li>
-          <li><b>Spread</b></li>
+          <li><b>Bid</b><%- backend.bid().toFixed(8) %></li>
+          <li><b>Ask</b><%- backend.ask().toFixed(8) %></li>
+          <li><b>Spread</b><%- backend.spread().toFixed(8) %></li>
         </ul>
       </div>
       
