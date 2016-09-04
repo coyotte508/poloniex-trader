@@ -32,7 +32,7 @@
     <div class="container">
 
       <div class="starter-template">
-        <h1>Poloniex-trader - <%- market %></h1>
+        <h1>Poloniex-trader - <%- config.market %></h1>
         <!--<p class="lead">Use this web interface to quickly configure the program.<br> No need to use the terminal anymore, everything in one interface.</p>-->
       </div>
 
@@ -63,7 +63,7 @@
 
               <form method="get">
                 <fieldset class="form-group">
-                  <label for="url">Enter time frame</label>
+                  <label for="time">Enter time frame</label>
                   <input type="text" class="form-control" name="time" id="time" placeholder="2h15m30s-1h15m" value="<%- config.time %>">
                 </fieldset>
                 <p><small>h: hour, m: minute, s: second. eg: 1h15m20s. Can enter range (from 2h ago to 1h ago: 2h-1h).</small></p>
@@ -79,6 +79,38 @@
           </div>
         </div>
       </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class = "panel panel-default">
+            <div class = "panel-heading">
+              <h2 class= "panel-title">Config</h2>
+            </div>
+            <div class = "panel-body">
+
+              <form method="post">
+                <fieldset class="form-group">
+                  <label for="market">Enter market</label>
+                  <select class="form-control" name="market" id="market">
+                  <% for(var i=0; i < config.markets.length; i++) { %>
+                     <option <% if (config.markets[i] == config.market){ %>selected<% } %>><%- config.markets[i] %></option>
+                  <% } %>
+                  </select>
+                </fieldset>
+
+                <fieldset class="form-group">
+                  <label for="apikey">Enter API key</label>
+                  <input type="text" class="form-control" name="apikey" id="apikey" placeholder="API key" value="<%- config.apikey %>">
+                </fieldset>
+
+                <input type="hidden" name="action" value="glconf">
+                <input type="submit" class="btn btn-primary pull-right" value="Submit">
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div><!-- /.container -->
     <!-- <%- config.begin %> <%- config.end %> -->
 

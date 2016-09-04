@@ -38,3 +38,4 @@ jspm_packages
 
 public
 bower_components
+.node-persist

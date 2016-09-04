@@ -7,10 +7,23 @@ const https = require('https');
 const httpsPort = 3444;
 const fs = require("fs");
 const moment = require("moment-timezone");
+const _ = require('lodash');
+const assert = require('assert');
 
 const backend = require("./backend.js");
-const config = {};
 const app = express();
+
+const storage = require('node-persist');
+
+storage.initSync();
+
+const config = _.extend(
+  {market: "BTC_XMR", markets: ["BTC_XMR"]},
+  storage.getItemSync("config") || {}
+);
+
+console.log(config);
+backend.init(config);
 
 app.set("port_https", httpsPort);
 
@@ -80,6 +93,12 @@ function analyzeBeginEnd(time) {
   return res;
 }
 
+function saveConfig() {
+  storage.setItemSync("config", config);
+
+  console.log("updated saved configuration");
+}
+
 app.use(compression());
 
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
@@ -96,7 +115,33 @@ app.get('/', auth, function(req, res) {
   var times = analyzeBeginEnd(config.time);
   config.begin = times[0];
   config.end = times[1];
-  res.render('index', {config, trades: backend.trades, error:null, market:backend.market})
+  res.render('index', {config, trades: backend.trades, error:null})
+});
+
+app.post("/", auth, function(req, res) {
+  console.log(JSON.stringify(req.body));
+  var error;
+  try {
+    if (req.body.action == "glconf") {
+      assert(req.body.market);
+
+      console.log("changing market to " + config.market);
+
+      config.market = req.body.market;
+      config.apikey = req.body.apikey;
+      backend.init(config);
+
+      saveConfig();
+    }
+
+    console.log("sending success");
+  } catch(err) {
+    console.log("sending back error", err);
+    res.status(500);
+    error = err.message;
+  }
+
+  res.render('index', {config, error, trades: backend.trades});
 });
 
 app.listen(3001);
@@ -107,3 +152,24 @@ const ssloptions = {
   cert: fs.readFileSync('app/security/certificate.pem')
 };
 var secureServer = https.createServer(ssloptions, app).listen(httpsPort);
+
+https.get("https://poloniex.com/public?command=returnTicker", (res) => {
+  console.log(`Got response: ${res.statusCode}`);
+  
+  if (res.statusCode == 200) {
+    var allData = "";
+    res.on("data", function(chunk) {
+      allData += chunk;
+    });
+    res.on("end", function() {
+      /* Reversing because trades are in reverse order */
+      allData = JSON.parse(allData);
+      config.markets = _.keys(allData).sort();
+    });
+  } else {
+    res.resume();
+  }
+}).on('error', (e) => {
+  console.log(`Got error: ${e.message}`);
+});
+

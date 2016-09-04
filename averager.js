@@ -58,7 +58,7 @@ Averager.prototype.averageOldData = function() {
 
       averagedData.addData(key, result);
     }
-    console.log(averagedData);
+    //console.log(averagedData);
 
     this.averagedData.push(averagedData);
     this.lastAveraged = newAveragingTime;

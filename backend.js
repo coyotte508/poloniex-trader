@@ -3,11 +3,8 @@ const trades = require("./trades.js");
 const autobahn = require('autobahn');
 
 var wsuri = "wss://api.poloniex.com";
-var market = "BTC_XMR";
-var connection = new autobahn.Connection({
-  url: wsuri,
-  realm: "realm1"
-});
+var market = null;
+var connection;
 
 var cnt = 0;
 
@@ -16,41 +13,64 @@ var tradeIds = {};
 var shouldAdd = true;
 var cache = [];
 
-connection.onopen = function (session) {
-  function marketEvent (args,kwargs) {
-    args.forEach(function(event) {
-      if (event.type != "newTrade") {
-        return;
-      }
-      if (shouldAdd) {
-        cache.push(event.data);
-      } else {
-        addTrade(event.data);
-      }
-    });
+function makeConnection() {
+  if (connection) {
+    try {
+      connection.close();
+    } catch (err) {
+      console.log(err);
+    }
   }
-  function tickerEvent (args,kwargs) {
-    if (args[0] != market) {
+  connection = new autobahn.Connection({
+    url: wsuri,
+    realm: "realm1"
+  });
+  connection.cnt = cnt;
+
+  connection.onopen = function (_session) {
+    if (connection.cnt != cnt) {
       return;
     }
-    //console.log("ticker", args);
-  }
-  function trollboxEvent (args,kwargs) {
-    //console.log("chat", args);
-  }
-  session.subscribe(market, marketEvent);
-  session.subscribe('ticker', tickerEvent);
-  session.subscribe('trollbox', trollboxEvent);
-}
+    session = _session;
 
-connection.onclose = function () {
-  console.log("Websocket connection closed");
-}
+    function marketEvent (args,kwargs) {
+      if (cnt != connection.cnt) {
+        return;
+      }
+      args.forEach(function(event) {
+        if (event.type != "newTrade") {
+          return;
+        }
+        //console.log(shouldAdd, event.data);
+        if (shouldAdd) {
+          cache.push(event.data);
+        } else {
+          addTrade(event.data);
+        }
+      });
+    }
+    function tickerEvent (args,kwargs) {
+      if (args[0] != market) {
+        return;
+      }
+      //console.log("ticker", args);
+    }
+    function trollboxEvent (args,kwargs) {
+      //console.log("chat", args);
+    }
+    session.subscribe(market, marketEvent);
+    session.subscribe('ticker', tickerEvent);
+    session.subscribe('trollbox', trollboxEvent);
+  }
 
-connection.open();
+  connection.onclose = function () {
+    console.log("Websocket connection closed", arguments);
+  }
+
+  connection.open();
+}
 
 function addTrade(trade) {
-  //console.log(++cnt, event.data);
   if (trade.tradeID in tradeIds) {
     return;
   }
@@ -63,35 +83,61 @@ function addTrade(trade) {
 
 var current = Math.floor(new Date().getTime()/1000);
 
-https.get("https://poloniex.com/public?command=returnTradeHistory&currencyPair=" + market + "&start=" + (current - (30*24*3600)) + "&end=" + current, (res) => {
-  console.log(`Got response: ${res.statusCode}`);
-  
-  if (res.statusCode == 200) {
-    var allData = "";
-    res.on("data", function(chunk) {
-      allData += chunk;
-    });
-    res.on("end", function() {
-      /* Reversing because trades are in reverse order */
-      allData = JSON.parse(allData).reverse();
-      console.log("Trades gotten trying to go back a month: " + allData.length);
-      allData.forEach(function(item) {
-        addTrade(item);
+function getOldTrades() {
+  var currentCount = cnt;
+
+  https.get("https://poloniex.com/public?command=returnTradeHistory&currencyPair=" + market + "&start=" + (current - (30*24*3600)) + "&end=" + current, (res) => {
+    console.log(`Got response: ${res.statusCode}`);
+    
+    if (res.statusCode == 200) {
+      var allData = "";
+      res.on("data", function(chunk) {
+        allData += chunk;
       });
-      shouldAdd = false;
-      cache.forEach(it => addTrade(it));
-    });
-  } else {
-    res.resume();
+      res.on("end", function() {
+        if (currentCount != cnt) {
+          return;
+        }
+        /* Reversing because trades are in reverse order */
+        allData = JSON.parse(allData).reverse();
+        console.log("Trades gotten trying to go back a month: " + allData.length);
+        allData.forEach(function(item) {
+          addTrade(item);
+        });
+        shouldAdd = false;
+        cache.forEach(it => addTrade(it));
+        cache = [];
+      });
+    } else {
+      res.resume();
+    }
+  }).on('error', (e) => {
+    console.log(`Got error: ${e.message}`);
+  });
+}
+
+function init(config) {
+  if (market == config.market) {
+    return;
   }
-}).on('error', (e) => {
-  console.log(`Got error: ${e.message}`);
-});
+  var current = ++cnt;
+  market = config.market;
+
+  shouldAdd = true;
+  cache = [];  
+  tradeIds = {};
+  trades.reset();
+    
+  makeConnection();
+  
+  getOldTrades();
+}
 
 module.exports = {
   trades,
   market,
   currentTime : function() {
     return trades.currentTime();
-  }
+  },
+  init
 };
