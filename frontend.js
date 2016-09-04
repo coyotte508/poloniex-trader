@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const basicAuth = require('basic-auth');
 const https = require('https');
 const httpsPort = 3444;
+const plnx = require("plnx");
 const fs = require("fs");
 const moment = require("moment-timezone");
 const _ = require('lodash');
@@ -18,7 +19,7 @@ const storage = require('node-persist');
 storage.initSync();
 
 const config = _.extend(
-  {market: "BTC_XMR", markets: ["BTC_XMR"]},
+  {market: "BTC_XMR", markets: ["BTC_XMR"], api:{}, balances: {}},
   storage.getItemSync("config") || {}
 );
 
@@ -128,10 +129,17 @@ app.post("/", auth, function(req, res) {
       console.log("changing market to " + config.market);
 
       config.market = req.body.market;
-      config.apikey = req.body.apikey;
+
+      var chgd = config.api.key != req.body.apikey || config.api.secret != req.body.apisecret;
+      config.api.key = req.body.apikey;
+      config.api.secret = req.body.apisecret;
       backend.init(config);
 
       saveConfig();
+
+      if (chgd) {
+        poloTrade = makeWrapper();
+      }
     }
 
     console.log("sending success");
@@ -141,7 +149,7 @@ app.post("/", auth, function(req, res) {
     error = err.message;
   }
 
-  res.render('index', {config, error, trades: backend.trades});
+  res.render('index', {config, error, trades: backend.trades, backend});
 });
 
 app.listen(3001);
@@ -173,3 +181,35 @@ https.get("https://poloniex.com/public?command=returnTicker", (res) => {
   console.log(`Got error: ${e.message}`);
 });
 
+function updateBalances() {
+  plnx.returnCompleteBalances(config.api, (err, data) => {
+    if (err) {
+      console.error(err);
+    } else {
+      config.balances = data;
+      _.keys(config.balances).forEach((key) => {
+        if (!+config.balances[key].btcValue) {
+          delete config.balances[key];
+        }
+      });
+      console.log(config.balances);
+    }
+
+    setTimeout(updateOrders, 500);
+  });
+}
+
+function updateOrders() {
+  plnx.returnOpenOrders(_.extend({currencyPair: config.market}, config.api), (err, data) => {
+    if (err) {
+      console.error(err);
+    } else {
+      config.openOrders = data;
+      console.log(config.openOrders);
+    }
+
+    setTimeout(updateBalances, 1000);
+  });
+}
+
+updateOrders();

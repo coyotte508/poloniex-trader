@@ -29,7 +29,8 @@
     "lodash": "^4.15.0",
     "moment": "^2.14.1",
     "moment-timezone": "^0.5.5",
-    "node-persist": "^2.0.2"
+    "node-persist": "^2.0.2",
+    "plnx": "0.0.10"
   },
   "devDependencies": {
     "grunt": "^1.0.1",

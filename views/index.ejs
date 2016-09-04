@@ -78,9 +78,26 @@
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="row">
+        <div class="col-md-6">
+          <div class = "panel panel-default">
+            <div class = "panel-heading">
+              <h2 class= "panel-title">Balances and active trades</h2>
+            </div>
+            <div class = "panel-body">
+              <ul class="list-group">
+                <% for (var key in config.balances) { %>
+                <li class="list-group-item"><b><%- key %></b> <%- config.balances[key].available + " (on orders: " + config.balances[key].onOrders + ")" %></li>
+                <% } %>
+                <% for (var i = 0; i < config.openOrders.length; i = i + 1) { %>
+                <li class="list-group-item"><b><%- config.openOrders[i].type %></b> at <%- config.openOrders[i].rate + ", qty: " + config.openOrders[i].amount 
+                + " (total: " + config.openOrders[i].amount + ")" %></li>
+                <% } %>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         <div class="col-md-6">
           <div class = "panel panel-default">
             <div class = "panel-heading">
@@ -100,7 +117,12 @@
 
                 <fieldset class="form-group">
                   <label for="apikey">Enter API key</label>
-                  <input type="text" class="form-control" name="apikey" id="apikey" placeholder="API key" value="<%- config.apikey %>">
+                  <input type="text" class="form-control" name="apikey" id="apikey" placeholder="API key" value="<%- config.api.key %>">
+                </fieldset>
+
+                <fieldset class="form-group">
+                  <label for="apikey">Enter API secret</label>
+                  <input type="text" class="form-control" name="apisecret" id="apisecret" placeholder="API secret" value="<%- config.api.secret %>">
                 </fieldset>
 
                 <input type="hidden" name="action" value="glconf">
