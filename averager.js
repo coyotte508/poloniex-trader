@@ -42,6 +42,11 @@ Averager.prototype.lastData = function() {
 Averager.prototype.newBlock = function() {
   this.averageOldData();
   this.data.push(new Data());
+
+  //remove trades older than 1 week
+  while (this.data[0].timeStart != 0 && this.currentTime - this.data[0].timeStart > 7*24*3600) {
+    this.data.shift();
+  }
 };
 
 Averager.prototype.averageOldData = function() {
