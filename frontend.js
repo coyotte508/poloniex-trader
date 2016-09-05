@@ -192,7 +192,7 @@ function updateBalances() {
           delete config.balances[key];
         }
       });
-      console.log(config.balances);
+      //console.log(config.balances);
     }
 
     setTimeout(updateOrders, 500);
@@ -205,7 +205,7 @@ function updateOrders() {
       console.error(err);
     } else {
       config.openOrders = data;
-      console.log(config.openOrders);
+      //console.log(config.openOrders);
     }
 
     setTimeout(updateBalances, 1000);
