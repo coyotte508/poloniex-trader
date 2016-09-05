@@ -39,5 +39,5 @@ node frontend.js
 or 
 
 ```
-node frontend.js
+nodejs frontend.js
 ```
