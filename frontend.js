@@ -10,6 +10,7 @@ const fs = require("fs");
 const moment = require("moment-timezone");
 const _ = require('lodash');
 const assert = require('assert');
+const readline = require('readline');
 
 const backend = require("./backend.js");
 const app = express();
@@ -42,6 +43,7 @@ var auth = function (req, res, next) {
 
   if (!req.secure) {
     res.redirect('https://'+req.hostname+':'+app.get('port_https')+req.url);
+    return;
   }
 
   var user = basicAuth(req);
@@ -213,3 +215,60 @@ function updateOrders() {
 }
 
 updateOrders();
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+function secure(cmd) {
+  config.webadmin = config.webadmin || {};
+
+  if (!cmd) {
+    console.log("empty user/password, removing secure auth");
+    config.webadmin.user = "";
+    config.webadmin.password = "";
+    saveConfig();
+    return;
+  }
+
+  assert(cmd.includes(" "), "Needs a username and a password");
+
+  var user = cmd.substr(0, cmd.indexOf(" "));
+  var password = cmd.substr(cmd.indexOf(" ") + 1);
+
+  assert(user.length > 0 && password.length > 0, "Username and password must be several characters");
+
+  console.log("user: `" + user + "`");
+  console.log("password: `" + password + "`");
+
+  config.webadmin.user = user;
+  config.webadmin.password = password;
+
+  saveConfig();
+}
+
+var commandHandler = {
+  "help" : () => {
+    console.log("- secure <user> <password>: secures the web interface with the identifiers given.")
+  },
+  "secure": secure
+  //"logs": logger.showLogs 
+};
+
+rl.on('line', (line) => {
+  var cmd = line.includes(" ") ? line.substr(0, line.indexOf(" ")) : line;
+
+  var func = (cmd in commandHandler) ? commandHandler[cmd] : (engine ? engine[cmd] : null);
+
+  if (func) {
+    try {
+      var arg = line.includes(" ") ? line.substr(line.indexOf(" ") + 1) : undefined;
+      func(arg);
+    } catch(err) {
+      console.log("Error: " + err.message);
+    }
+  } else {
+    console.log(`${cmd} is not a valid command! Type help to see the commands.`);
+  }
+});

@@ -31,7 +31,8 @@
     "moment-timezone": "^0.5.5",
     "node-persist": "^2.0.2",
     "plnx": "0.0.10",
-    "poloniex-orderbook": "^2.0.0"
+    "poloniex-orderbook": "^2.0.0",
+    "readline": "^1.3.0"
   },
   "devDependencies": {
     "grunt": "^1.0.1",
