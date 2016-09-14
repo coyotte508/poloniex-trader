@@ -89,7 +89,7 @@
                 <% for (var key in config.balances) { %>
                 <li class="list-group-item"><b><%- key %></b> <%- config.balances[key].available + " (on orders: " + config.balances[key].onOrders + ")" %></li>
                 <% } %>
-                <% for (var i = 0; i < config.openOrders.length; i = i + 1) { %>
+                <% for (var i = 0; i < (config.openOrders||[]).length; i = i + 1) { %>
                 <li class="list-group-item"><b><%- config.openOrders[i].type %></b> at <%- config.openOrders[i].rate + ", qty: " + config.openOrders[i].amount 
                 + " (total: " + config.openOrders[i].amount + ")" %></li>
                 <% } %>

@@ -4,7 +4,7 @@ Poloniex trader and analyzer
 ### Requirements
 
 ```
-sudo apt-get install nodejs npm
+sudo apt-get install nodejs npm build-essential
 
 ## The three lines below are to upgrade node version on ubuntu
 sudo npm install -g n
