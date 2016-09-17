@@ -20,7 +20,8 @@ const storage = require('node-persist');
 storage.initSync();
 
 const config = _.extend(
-  {market: "BTC_XMR", markets: ["BTC_XMR"], api:{}, balances: {}},
+  {market: "BTC_XMR", markets: ["BTC_XMR"], api:{}, balances: {},
+   curr1: "BTC", curr2: "XMR"},
   storage.getItemSync("config") || {}
 );
 
@@ -131,6 +132,8 @@ app.post("/", auth, function(req, res) {
       console.log("changing market to " + config.market);
 
       config.market = req.body.market;
+      config.curr1 = config.market.split("_")[0];
+      config.curr2 = config.market.split("_")[1];
 
       var chgd = config.api.key != req.body.apikey || config.api.secret != req.body.apisecret;
       config.api.key = req.body.apikey;

@@ -53,11 +53,114 @@
         </ul>
       </div>
       
+
       <div class="row">
         <div class="col-md-6">
           <div class = "panel panel-default">
             <div class = "panel-heading">
-              <h2 class= "panel-title">Time period</h2>
+              <h2 class= "panel-title">Make a buy order (buy <%- config.curr2 %> with <%- config.curr1 %>)</h2>
+            </div>
+            <div class = "panel-body">
+              <ul class="list-group">
+
+              </ul>
+
+              <form method="post" class="">
+                <h3>Conditions</h3>
+                <fieldset class="form-group form-row">
+                  <label for="buy-avail-percent" class="col-sm-3">Balance available</label>
+                  <div class="input-group col-sm-9">
+                     <input type="text" class="form-control" id="buy-avail-percent" name="buy-avail-percent" placeholder="90" value="0">
+                     <span class="input-group-addon">%</span>
+                  </div>
+                </fieldset>
+                <fieldset class="form-group form-row">
+                  <label for="buy-avail-min" class="col-sm-3 col-form-label">Minimum balance</label>
+                  <div class="input-group col-sm-9">
+                     <input type="text" class="form-control" id="buy-avail-min" name="buy-avail-min" placeholder="0.100" value="0">
+                    <div class="input-group-addon"><%- config.curr1 %></div>
+                  </div>
+                </fieldset>
+
+                <h3>Order</h3>
+                <fieldset class="form-group form-row">
+                  <label for="buy-price" class="col-sm-3">Buy Price</label>
+                  <div class="input-group col-sm-9">
+                     <input type="text" class="form-control" id="buy-price" name="buy-price" placeholder="bid + (ask-bid)/20">
+                  </div>
+                  <p><small>Variables: ask, bid, spread</small></p>
+                </fieldset>
+                <fieldset class="form-group form-row">
+                  <label for="buy-amount" class="col-sm-3">Amount</label>
+                  <div class="input-group col-sm-9">
+                     <input type="text" class="form-control" id="buy-amount" name="buy-amount" placeholder="available/10">
+                  </div>
+                  <p><small>Variables: available, onOrders, total</small></p>
+                </fieldset>
+
+                <input type="hidden" name="action" value="buyorder">
+                <input type="submit" class="btn btn-primary pull-right" value="Add order">
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class = "panel panel-default">
+            <div class = "panel-heading">
+              <h2 class= "panel-title">Make a sell order (sell <%- config.curr2 %> for <%- config.curr1 %>)</h2>
+            </div>
+            <div class = "panel-body">
+              <ul class="list-group">
+
+              </ul>
+
+              <form method="post">
+                <h3>Conditions</h3>
+                <fieldset class="form-group form-row">
+                  <label for="sell-avail-percent" class="col-sm-3">Balance available</label>
+                  <div class="input-group col-sm-9">
+                     <input type="text" class="form-control" id="sell-avail-percent" name="sell-avail-percent" placeholder="90" value="0">
+                    <div class="input-group-addon">%</div>
+                  </div>
+                </fieldset>
+                <fieldset class="form-group form-row">
+                  <label for="sell-avail-min" class="col-sm-3">Minimum balance</label>
+                  <div class="input-group col-sm-9">
+                     <input type="text" class="form-control" id="sell-avail-min" name="sell-avail-min" placeholder="0.100" value="0">
+                    <div class="input-group-addon"><%- config.curr2 %></div>
+                  </div>
+                </fieldset>
+
+                <h3>Order</h3>
+                <fieldset class="form-group form-row">
+                  <label for="sell-price" class="col-sm-3">Sell Price</label>
+                  <div class="input-group col-sm-9">
+                     <input type="text" class="form-control" id="sell-price" name="sell-price" placeholder="bid + (ask-bid)/20">
+                  </div>
+                  <p><small>Variables: ask, bid, spread</small></p>
+                </fieldset>
+                <fieldset class="form-group form-row">
+                  <label for="sell-amount" class="col-sm-3">Amount</label>
+                  <div class="input-group col-sm-9">
+                     <input type="text" class="form-control" id="sell-amount" name="sell-amount" placeholder="available/10">
+                  </div>
+                  <p><small>Variables: available, onOrders, total</small></p>
+                </fieldset>
+
+                <input type="hidden" name="action" value="sellorder">
+                <input type="submit" class="btn btn-primary pull-right" value="Add order">
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class = "panel panel-default">
+            <div class = "panel-heading">
+              <h2 class= "panel-title">Analysis for time period</h2>
             </div>
             <div class = "panel-body">
 
@@ -73,7 +176,7 @@
                   <li><b>Low</b><%- trades.low(config.begin, config.end) %></li>
                   <li><b>High</b><%- trades.high(config.begin, config.end) %></li>
                 </ul>
-                <input type="submit" class="btn btn-primary pull-right" value="Submit">
+                <input type="submit" class="btn btn-primary pull-right" value="Analyze">
               </form>
             </div>
           </div>
@@ -86,8 +189,16 @@
             </div>
             <div class = "panel-body">
               <ul class="list-group">
-                <% for (var key in config.balances) { %>
-                <li class="list-group-item"><b><%- key %></b> <%- config.balances[key].available + " (on orders: " + config.balances[key].onOrders + ")" %></li>
+                <% for (var key in config.balances) { 
+                  var avail = +config.balances[key].available;
+                  var orders = +config.balances[key].onOrders;
+                  var percent = 0;
+                  if (avail > 0) {
+                    percent = avail*100 / (avail+orders);
+                  }
+                %>
+                <li class="list-group-item"><b><%- key %></b> <%- avail + " (on orders: " + orders + ")" %>
+                  <small> <%- percent %>% available</small></li>
                 <% } %>
                 <% for (var i = 0; i < (config.openOrders||[]).length; i = i + 1) { %>
                 <li class="list-group-item"><b><%- config.openOrders[i].type %></b> at <%- config.openOrders[i].rate + ", qty: " + config.openOrders[i].amount 
