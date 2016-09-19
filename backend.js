@@ -250,14 +250,14 @@ function analyzeOrders(type, orders, balance) {
         continue;
       }
 
-      var amount = vm.runInContext(order.amount, context) || 0;
+      var btcAmount = vm.runInContext(order.amount, context) || 0;
 
-      if (!amount || avail < amount) {
+      if (!btcAmount || avail < btcAmount) {
         continue;
       }
 
       //Second currency's amount
-      amount /= price;
+      var amount = btcAmount / price;
 
       if (amount < 0.0001) {
         continue;
