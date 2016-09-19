@@ -21,7 +21,7 @@ storage.initSync();
 
 const config = _.extend(
   {market: "BTC_XMR", markets: ["BTC_XMR"], api:{}, balances: {},
-   curr1: "BTC", curr2: "XMR"},
+   curr1: "BTC", curr2: "XMR", buyOrders: [], sellOrders: []},
   storage.getItemSync("config") || {}
 );
 
@@ -126,6 +126,7 @@ app.post("/", auth, function(req, res) {
   console.log(JSON.stringify(req.body));
   var error;
   try {
+    console.log(req.body.action);
     if (req.body.action == "glconf") {
       assert(req.body.market);
 
@@ -145,6 +146,40 @@ app.post("/", auth, function(req, res) {
       if (chgd) {
         poloTrade = makeWrapper();
       }
+    }
+
+    if (req.body.action == "buyorder" || req.body.action == "sellorder") {
+      var pref = req.body.action == "buyorder" ? "buy" : "sell";
+      assert(+req.body[`${pref}-avail-percent`] >= 0 && +req.body[`${pref}-avail-percent`] <= 100, "Error for avail percent value: " + req.body[`${pref}-avail-percent`]);
+      assert(+req.body[`${pref}-avail-min`] >= 0, "Error for min percent value: " + req.body[`${pref}-avail-min`]);
+      assert(req.body[`${pref}-price`], "Error for price value, must be non null");
+      assert(req.body[`${pref}-amount`], "Error for amount value, must be non null");
+
+      var order = {
+        availPercent: +req.body[`${pref}-avail-percent`],
+        availMin: +req.body[`${pref}-avail-min`],
+        price: req.body[`${pref}-price`],
+        amount: req.body[`${pref}-amount`]
+      }
+      if (req.body.action == "buyorder") {
+        config.buyOrders.push(order)
+      } else {
+        config.sellOrders.push(order);
+      }
+
+      saveConfig();
+    }
+
+    if (req.body.action == "remove-sellorder") {
+      var key = +req.body.key;
+      config.sellOrders.splice(key, 1);
+      saveConfig();
+    }
+
+    if (req.body.action == "remove-buyorder") {
+      var key = +req.body.key;
+      config.buyOrders.splice(key, 1);
+      saveConfig();
     }
 
     console.log("sending success");

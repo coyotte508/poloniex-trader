@@ -62,7 +62,19 @@
             </div>
             <div class = "panel-body">
               <ul class="list-group">
-
+                <% for (var key in config.buyOrders) { 
+                  var order = config.buyOrders[key];
+                %>
+                <li class="list-group-item"><b><%- (+key+1) %></b> - <%- JSON.stringify(order) %> 
+                <small>
+                  <form method="post" id="remove-buyorder-<%- key %>" class="form-inline">
+                  <a href='#' onclick="document.getElementById('remove-buyorder-<%- key %>').submit()">remove</a>
+                  <input type="hidden" name="action" value="remove-buyorder">
+                  <input type="hidden" name="key" value="<%- key %>">
+                  </form>
+                </small>
+                </li>
+                <% } %>
               </ul>
 
               <form method="post" class="">
@@ -112,7 +124,19 @@
             </div>
             <div class = "panel-body">
               <ul class="list-group">
-
+                <% for (var key in config.sellOrders) { 
+                  var order = config.sellOrders[key];
+                %>
+                <li class="list-group-item"><b><%- (+key+1) %></b> - <%- JSON.stringify(order) %> 
+                <small>
+                  <form method="post" id="remove-sellorder-<%- key %>" class="form-inline">
+                  <a href='#' onclick="document.getElementById('remove-sellorder-<%- key %>').submit()">remove</a>
+                  <input type="hidden" name="action" value="remove-sellorder">
+                  <input type="hidden" name="key" value="<%- key %>">
+                  </form>
+                </small>
+                </li>
+                <% } %>
               </ul>
 
               <form method="post">
