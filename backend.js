@@ -1,9 +1,9 @@
 const https = require("https");
 const trades = require("./trades.js");
+const _ = require('lodash');
+const plnx = require("plnx");
 const autobahn = require('autobahn');
 const PoloBook = require('poloniex-orderbook');
-
-const _ = require('lodash');
 
 var wsuri = "wss://api.poloniex.com";
 var market = null;
@@ -17,6 +17,7 @@ var shouldAdd = true;
 var cache = [];
 
 var polobook = {};
+var conf;
 
 function makeConnection() {
   if (connection) {
@@ -121,11 +122,14 @@ function getOldTrades() {
 }
 
 function init(config) {
+  conf = config;
   if (market == config.market) {
     return;
   }
   var current = ++cnt;
   market = config.market;
+  buyOrders = config.buyOrders;
+  sellOrders = config.sellOrders;
 
   shouldAdd = true;
   cache = [];  
@@ -138,6 +142,118 @@ function init(config) {
   polobook = new PoloBook(market);
   polobook.start();
 }
+
+function isAvailable() {
+  return shouldAdd ? false : true;
+}
+
+var loopEventInternal = {
+  lastUpdatedBalance: 0,
+  lastUpdatedOrders: 0,
+  lastTakenBuyOrder: 0,
+  lastTakenSellOrder: 0
+};
+
+loopEvent = _.throttle(()=>{
+  var current = Date.now();
+
+  var data = loopEventInternal;
+  if (data.lastUpdatedBalance == 0) {
+    updateBalances();
+    return;
+  }
+  if (data.lastUpdatedOrders == 0) {
+    updateOrders();
+    return;
+  }
+
+  var pairs = {
+    lastTakenSellOrder: doSellOrders,
+    lastTakenBuyOrder: doBuyOrder
+  };
+
+  if (current - data.lastUpdatedBalance > 1000) {
+    pairs.lastUpdatedBalance = updateBalances;
+  }
+
+  if (current - data.lastUpdatedBalance > 1000) {
+    pairs.lastUpdatedOrders = updateOrders;
+  }
+
+  var keys = _.keys(pairs).sort(function(k1, k2) {
+    return loopEventInternal[k1] - loopEventInternal[k2];
+  });
+
+  for (let key of keys) {
+    if (pairs[key]()) {
+      return;
+    }
+  }
+
+  loopEvent();
+
+}, 250);
+
+function doSellOrders() {
+  if (!conf) {
+    return false;
+  }
+  return false;
+}
+
+function doSellOrders() {
+  if (!conf) {
+    return false;
+  }
+  return false;
+}
+
+function updateBalances() {
+  var config = conf;
+  if (!config) {
+    return false;
+  }
+  plnx.returnCompleteBalances(config.api, (err, data) => {
+    if (err) {
+      console.error(err);
+    } else {
+      loopEventInternal.lastUpdatedBalance = Date.now();
+
+      config.balances = data;
+      _.keys(config.balances).forEach((key) => {
+        if (!+config.balances[key].btcValue) {
+          delete config.balances[key];
+        }
+      });
+      //console.log(config.balances);
+    }
+
+    loopEvent();
+  });
+  return true;
+}
+
+function updateOrders() {
+  var config = conf;
+  if (!config) {
+    return false;
+  }
+  plnx.returnOpenOrders(_.extend({currencyPair: config.market}, config.api), (err, data) => {
+    if (err) {
+      console.error(err);
+    } else {
+      loopEventInternal.lastUpdatedOrders = Date.now();
+
+      config.openOrders = data;
+      //console.log(config.openOrders);
+    }
+
+    loopEvent();
+  });
+  return true;
+}
+
+loopEvent();
 
 module.exports = {
   trades,

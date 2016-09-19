@@ -5,7 +5,6 @@ const bodyParser = require('body-parser');
 const basicAuth = require('basic-auth');
 const https = require('https');
 const httpsPort = 3444;
-const plnx = require("plnx");
 const fs = require("fs");
 const moment = require("moment-timezone");
 const _ = require('lodash');
@@ -220,39 +219,6 @@ https.get("https://poloniex.com/public?command=returnTicker", (res) => {
 }).on('error', (e) => {
   console.log(`Got error: ${e.message}`);
 });
-
-function updateBalances() {
-  plnx.returnCompleteBalances(config.api, (err, data) => {
-    if (err) {
-      console.error(err);
-    } else {
-      config.balances = data;
-      _.keys(config.balances).forEach((key) => {
-        if (!+config.balances[key].btcValue) {
-          delete config.balances[key];
-        }
-      });
-      //console.log(config.balances);
-    }
-
-    setTimeout(updateOrders, 500);
-  });
-}
-
-function updateOrders() {
-  plnx.returnOpenOrders(_.extend({currencyPair: config.market}, config.api), (err, data) => {
-    if (err) {
-      console.error(err);
-    } else {
-      config.openOrders = data;
-      //console.log(config.openOrders);
-    }
-
-    setTimeout(updateBalances, 1000);
-  });
-}
-
-updateOrders();
 
 const rl = readline.createInterface({
   input: process.stdin,
