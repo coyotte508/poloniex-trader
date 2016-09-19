@@ -19,7 +19,7 @@ const storage = require('node-persist');
 storage.initSync();
 
 const config = _.extend(
-  {market: "BTC_XMR", markets: ["BTC_XMR"], api:{}, balances: {},
+  {market: "BTC_XMR", markets: ["BTC_XMR"], api:{}, balances: {}, openOrders: [],
    curr1: "BTC", curr2: "XMR", buyOrders: [], sellOrders: []},
   storage.getItemSync("config") || {}
 );

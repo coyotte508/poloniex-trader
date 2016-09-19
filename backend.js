@@ -4,6 +4,7 @@ const _ = require('lodash');
 const plnx = require("plnx");
 const autobahn = require('autobahn');
 const PoloBook = require('poloniex-orderbook');
+const vm = require('vm');
 
 var wsuri = "wss://api.poloniex.com";
 var market = null;
@@ -187,20 +188,97 @@ loopEvent = _.throttle(()=>{
   //console.log("adding to back timer");
   loopEvent();
 
-}, 250);
+}, 205);
+
+function doBuyOrders() {
+  if (!conf) {
+    return false;
+  }
+
+  if (analyzeOrders("buy", conf.buyOrders, conf.balances[conf.curr1])) {
+    loopEventInternal.lastTakenBuyOrder = Date.now();
+    return true;
+  }
+
+  return false;
+}
 
 function doSellOrders() {
   if (!conf) {
     return false;
   }
 
+  if (analyzeOrders("sell", conf.sellOrders, conf.balances[conf.curr2])) {
+    loopEventInternal.lastTakenSellOrder = Date.now();
+    return true;
+  }
+
   return false;
 }
 
-function doBuyOrders() {
-  if (!conf) {
+function analyzeOrders(type, orders, balance) {
+  if (!isAvailable()) {
     return false;
   }
+
+  try {
+    balance = balance || {};
+    var avail = +(balance.available || 0);
+    var onOrders = +(balance.onOrders || 0);
+    var total = avail+onOrders;
+    var availPercent = avail == 0 ? 0 : 100*avail/total;
+    for (let order of orders) {
+      if (avail == 0) {
+        continue;
+      }
+      if (availPercent < order.availPercent) {
+        continue;
+      }
+      if (avail < order.availMin) {
+        continue;
+      }
+
+      var context = {
+        ask: +ask(), bid: +bid(), spread: spread(), 
+        available: avail, onOrders, total     
+      }
+      vm.createContext(context);
+
+      var price = vm.runInContext(order.price, context) || 0;
+      
+      if (!price) {
+        continue;
+      }
+
+      var amount = vm.runInContext(order.amount, context) || 0;
+
+      if (!amount || avail < amount) {
+        continue;
+      }
+
+      //Second currency's amount
+      amount /= price;
+
+      if (amount < 0.0001) {
+        continue;
+      }
+
+      plnx[type](_.extend({currencyPair: market, rate: price, amount}, conf.api), (err, data) => {
+        if (err) {
+          console.error(err);
+        } else {
+          console.log(data);
+        }
+
+        loopEvent();
+      });
+
+      return true;
+    }
+  } catch (err) {
+    console.error(err);
+  }
+
   return false;
 }
 
@@ -251,6 +329,18 @@ function updateOrders() {
 
 loopEvent();
 
+function ask() {
+  return polobook && polobook.asks && polobook.asks.length > 0 ? polobook.asks[0][0] : "0";
+}
+
+function bid() {
+  return polobook && polobook.bids && polobook.bids.length > 0 ? polobook.bids[0][0] : "0";
+}
+
+function spread() {
+  return +ask() - (+bid());
+}
+
 module.exports = {
   trades,
   market,
@@ -258,7 +348,7 @@ module.exports = {
     return trades.currentTime();
   },
   init,
-  bid: () => polobook && polobook.bids && polobook.bids.length > 0 ? polobook.bids[0][0] : "0",
-  ask: () => polobook && polobook.asks && polobook.asks.length > 0 ? polobook.asks[0][0] : "0",
-  spread: () => (+module.exports.ask())-(+module.exports.bid())
+  bid,
+  ask,
+  spread
 };

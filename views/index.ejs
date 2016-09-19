@@ -103,7 +103,7 @@
                   <p><small>Variables: ask, bid, spread</small></p>
                 </fieldset>
                 <fieldset class="form-group form-row">
-                  <label for="buy-amount" class="col-sm-3">Amount</label>
+                  <label for="buy-amount" class="col-sm-3">BTC Amount</label>
                   <div class="input-group col-sm-9">
                      <input type="text" class="form-control" id="buy-amount" name="buy-amount" placeholder="available/10">
                   </div>
@@ -165,7 +165,7 @@
                   <p><small>Variables: ask, bid, spread</small></p>
                 </fieldset>
                 <fieldset class="form-group form-row">
-                  <label for="sell-amount" class="col-sm-3">Amount</label>
+                  <label for="sell-amount" class="col-sm-3">BTC Amount</label>
                   <div class="input-group col-sm-9">
                      <input type="text" class="form-control" id="sell-amount" name="sell-amount" placeholder="available/10">
                   </div>
@@ -226,7 +226,7 @@
                 <% } %>
                 <% for (var i = 0; i < (config.openOrders||[]).length; i = i + 1) { %>
                 <li class="list-group-item"><b><%- config.openOrders[i].type %></b> at <%- config.openOrders[i].rate + ", qty: " + config.openOrders[i].amount 
-                + " (total: " + config.openOrders[i].amount + ")" %></li>
+                + " (total: " + config.openOrders[i].total + ")" %></li>
                 <% } %>
               </ul>
             </div>
