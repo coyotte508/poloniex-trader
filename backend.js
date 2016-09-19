@@ -250,14 +250,16 @@ function analyzeOrders(type, orders, balance) {
         continue;
       }
 
-      var btcAmount = vm.runInContext(order.amount, context) || 0;
+      var amount = vm.runInContext(order.amount, context) || 0;
 
       if (!btcAmount || avail < btcAmount) {
         continue;
       }
 
       //Second currency's amount
-      var amount = btcAmount / price;
+      if (type == "buy") {
+        amount = amount / price;
+      }
 
       if (amount < 0.0001) {
         continue;
@@ -272,6 +274,9 @@ function analyzeOrders(type, orders, balance) {
 
         loopEvent();
       });
+
+      balance.available = (avail-amount);
+      balance.onOrders += (onOrders+amount);
 
       return true;
     }
