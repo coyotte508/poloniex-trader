@@ -256,6 +256,8 @@ function analyzeOrders(type, orders, balance) {
         continue;
       }
 
+      var rawAmount = amount;
+
       //Second currency's amount
       if (type == "buy") {
         amount = amount / price;
@@ -275,8 +277,8 @@ function analyzeOrders(type, orders, balance) {
         loopEvent();
       });
 
-      balance.available = (avail-amount);
-      balance.onOrders += (onOrders+amount);
+      balance.available = (avail-rawAmount);
+      balance.onOrders += (onOrders+rawAmount);
 
       return true;
     }
