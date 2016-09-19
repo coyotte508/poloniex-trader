@@ -150,26 +150,19 @@ function isAvailable() {
 var loopEventInternal = {
   lastUpdatedBalance: 0,
   lastUpdatedOrders: 0,
-  lastTakenBuyOrder: 0,
-  lastTakenSellOrder: 0
+  lastTakenBuyOrder: 1,
+  lastTakenSellOrder: 1
 };
 
 loopEvent = _.throttle(()=>{
   var current = Date.now();
+  //console.log("looping");
 
   var data = loopEventInternal;
-  if (data.lastUpdatedBalance == 0) {
-    updateBalances();
-    return;
-  }
-  if (data.lastUpdatedOrders == 0) {
-    updateOrders();
-    return;
-  }
 
   var pairs = {
     lastTakenSellOrder: doSellOrders,
-    lastTakenBuyOrder: doBuyOrder
+    lastTakenBuyOrder: doBuyOrders
   };
 
   if (current - data.lastUpdatedBalance > 1000) {
@@ -181,15 +174,17 @@ loopEvent = _.throttle(()=>{
   }
 
   var keys = _.keys(pairs).sort(function(k1, k2) {
-    return loopEventInternal[k1] - loopEventInternal[k2];
+    return data[k1] - data[k2];
   });
 
   for (let key of keys) {
+    //console.log("executing", key);
     if (pairs[key]()) {
       return;
     }
   }
 
+  //console.log("adding to back timer");
   loopEvent();
 
 }, 250);
@@ -198,10 +193,11 @@ function doSellOrders() {
   if (!conf) {
     return false;
   }
+
   return false;
 }
 
-function doSellOrders() {
+function doBuyOrders() {
   if (!conf) {
     return false;
   }
