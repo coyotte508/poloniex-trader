@@ -256,18 +256,17 @@ function analyzeOrders(type, orders, balance) {
         continue;
       }
 
-      var rawAmount = amount;
-
-      //Second currency's amount
-      if (type == "buy") {
-        amount = amount / price;
-      }
-
       if (amount < 0.0001) {
         continue;
       }
 
-      plnx[type](_.extend({currencyPair: market, rate: price, amount}, conf.api), (err, data) => {
+      var curAmount = amount;
+      //Second currency's amount
+      if (type == "buy") {
+        curAmount /= price;
+      }
+
+      plnx[type](_.extend({currencyPair: market, rate: price, amount: curAmount}, conf.api), (err, data) => {
         if (err) {
           console.error(err);
         } else {
@@ -277,8 +276,8 @@ function analyzeOrders(type, orders, balance) {
         loopEvent();
       });
 
-      balance.available = (avail-rawAmount);
-      balance.onOrders += (onOrders+rawAmount);
+      balance.available = (avail-amount);
+      balance.onOrders += (onOrders+amount);
 
       return true;
     }
