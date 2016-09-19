@@ -252,7 +252,7 @@ function analyzeOrders(type, orders, balance) {
 
       var amount = vm.runInContext(order.amount, context) || 0;
 
-      if (!btcAmount || avail < btcAmount) {
+      if (!amount || avail < amount) {
         continue;
       }
 
